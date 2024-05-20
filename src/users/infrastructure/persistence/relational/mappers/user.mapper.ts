@@ -21,6 +21,9 @@ export class UserMapper {
     }
     user.role = raw.role;
     user.status = raw.status;
+    user.cart = raw.cart;
+    user.wishlist = raw.wishlist;
+    user.viewed = raw.viewed;
     user.createdAt = raw.createdAt;
     user.updatedAt = raw.updatedAt;
     user.deletedAt = raw.deletedAt;
@@ -66,6 +69,15 @@ export class UserMapper {
     userEntity.photo = photo;
     userEntity.role = role;
     userEntity.status = status;
+    if (user.cart) {
+      userEntity.cart = user.cart;
+    }
+    if (user.wishlist) {
+      userEntity.wishlist = user.wishlist;
+    }
+    if (user.viewed) {
+      userEntity.viewed = user.viewed;
+    }
     userEntity.createdAt = user.createdAt;
     userEntity.updatedAt = user.updatedAt;
     userEntity.deletedAt = user.deletedAt;

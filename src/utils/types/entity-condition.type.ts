@@ -1,3 +1,3 @@
-export type EntityCondition<T> = {
-  [P in keyof T]?: T[P] | T[P][] | undefined;
-};
+import { FindOptionsWhere } from 'typeorm';
+
+export type EntityCondition<T> = FindOptionsWhere<T>;

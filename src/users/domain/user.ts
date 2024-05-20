@@ -3,14 +3,9 @@ import { FileType } from '../../files/domain/file';
 import { Role } from '../../roles/domain/role';
 import { Status } from '../../statuses/domain/status';
 import { ApiResponseProperty } from '@nestjs/swagger';
-import databaseConfig from '../../database/config/database.config';
-import { DatabaseConfig } from '../../database/config/database-config.type';
+import { Product } from '../../products/entities/product.entity';
 
-// <database-block>
-const idType = (databaseConfig() as DatabaseConfig).isDocumentDatabase
-  ? String
-  : Number;
-// </database-block>
+const idType = Number;
 
 export class User {
   @ApiResponseProperty({
@@ -71,6 +66,15 @@ export class User {
     type: () => Status,
   })
   status?: Status;
+
+  @ApiResponseProperty({ type: [Product] })
+  cart?: Product[];
+
+  @ApiResponseProperty({ type: [Product] })
+  viewed?: Product[];
+
+  @ApiResponseProperty({ type: [Product] })
+  wishlist?: Product[];
 
   @ApiResponseProperty()
   createdAt: Date;
