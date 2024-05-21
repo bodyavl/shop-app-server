@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { NullableType } from '../../../../../utils/types/nullable.type';
 import { FilterUserDto, SortUserDto } from '../../../../dto/query-user.dto';
 import { User } from '../../../../domain/user';
 import { UserRepository } from '../../user.repository';
 import { UserMapper } from '../mappers/user.mapper';
-import { EntityCondition } from '../../../../../utils/types/entity-condition.type';
 import { IPaginationOptions } from '../../../../../utils/types/pagination-options';
 
 @Injectable()
@@ -58,10 +57,10 @@ export class UsersRelationalRepository implements UserRepository {
     return entities.map((user) => UserMapper.toDomain(user));
   }
 
-  async findOne(fields: EntityCondition<User>): Promise<NullableType<User>> {
-    const entity = await this.usersRepository.findOne({
-      where: fields as FindOptionsWhere<UserEntity>,
-    });
+  async findOne(
+    options: FindOneOptions<UserEntity>,
+  ): Promise<NullableType<User>> {
+    const entity = await this.usersRepository.findOne(options);
 
     return entity ? UserMapper.toDomain(entity) : null;
   }

@@ -11,7 +11,7 @@ export class User {
   @ApiResponseProperty({
     type: idType,
   })
-  id: number | string;
+  id: number;
 
   @ApiResponseProperty({
     type: String,

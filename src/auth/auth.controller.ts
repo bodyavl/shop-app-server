@@ -10,6 +10,8 @@ import {
   Patch,
   Delete,
   SerializeOptions,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -18,12 +20,14 @@ import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
 import { AuthUpdateDto } from './dto/auth-update.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { NullableType } from '../utils/types/nullable.type';
 import { User } from '../users/domain/user';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
+import { AccessTokenGuard } from './guards/access.guard';
+import { RefreshTokenGuard } from './guards/refresh.guard';
+import { GetUser } from './decorators/get-user.decorator';
 
 @ApiTags('Auth')
 @Controller({
@@ -91,7 +95,7 @@ export class AuthController {
     groups: ['me'],
   })
   @Get('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AccessTokenGuard)
   @ApiOkResponse({
     type: User,
   })
@@ -101,14 +105,40 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @ApiOkResponse({
-    type: RefreshResponseDto,
-  })
+  @Post('me/cart/:productId/add')
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public addToCart(
+    @Param('productId', ParseIntPipe) productId: number,
+    @GetUser('id') userId: number,
+  ): Promise<void> {
+    return this.service.addToCart(userId, productId);
+  }
+
+  @ApiBearerAuth()
+  @Delete('me/cart/:productId/remove')
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public removeFromCart(
+    @Param('productId', ParseIntPipe) productId: number,
+    @GetUser('id') userId: number,
+  ): Promise<void> {
+    return this.service.removeFromCart(userId, productId);
+  }
+
+  @ApiBearerAuth()
+  @Delete('me/cart/clear')
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public clearCart(@GetUser('id') userId: number): Promise<void> {
+    return this.service.clearCart(userId);
+  }
+
   @SerializeOptions({
     groups: ['me'],
   })
   @Post('refresh')
-  @UseGuards(AuthGuard('jwt-refresh'))
+  @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   public refresh(@Request() request): Promise<RefreshResponseDto> {
     return this.service.refreshToken({
@@ -119,7 +149,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Post('logout')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   public async logout(@Request() request): Promise<void> {
     await this.service.logout({
@@ -132,7 +162,7 @@ export class AuthController {
     groups: ['me'],
   })
   @Patch('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: User,
@@ -146,7 +176,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Delete('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   public async delete(@Request() request): Promise<void> {
     return this.service.softDelete(request.user);

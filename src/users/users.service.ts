@@ -16,13 +16,107 @@ import { StatusEnum } from '../statuses/statuses.enum';
 import { EntityCondition } from '../utils/types/entity-condition.type';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { DeepPartial } from '../utils/types/deep-partial.type';
+import { ProductsService } from '../products/products.service';
+import { UserEntity } from './infrastructure/persistence/relational/entities/user.entity';
+import { getEntityRelations } from '../utils/get-entity-relations';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UserRepository,
     private readonly filesService: FilesService,
+    private readonly productsService: ProductsService,
   ) {}
+
+  async addToCart(
+    userId: User['id'],
+    productId: number,
+  ): Promise<NullableType<User>> {
+    const userObject = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: { cart: true },
+      select: {
+        id: true,
+        cart: {
+          id: true,
+        },
+      },
+    });
+
+    if (!userObject?.cart) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          user: 'userWithCartNotExists',
+        },
+      });
+    }
+
+    const productObject = await this.productsService.findOne({
+      id: productId,
+    });
+
+    if (!productObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          product: 'productNotExists',
+        },
+      });
+    }
+
+    const cart = [...userObject?.cart, productObject];
+
+    return this.usersRepository.update(userId, { cart });
+  }
+
+  async removeFromCart(
+    userId: User['id'],
+    productId: number,
+  ): Promise<NullableType<User>> {
+    const userObject = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: { cart: true },
+      select: {
+        id: true,
+        cart: {
+          id: true,
+        },
+      },
+    });
+
+    if (!userObject?.cart) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          user: 'userWithCartNotExists',
+        },
+      });
+    }
+
+    const productObject = await this.productsService.findOne({
+      id: productId,
+    });
+
+    if (!productObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          product: 'productNotExists',
+        },
+      });
+    }
+
+    const cart = userObject?.cart.filter(
+      (product) => product.id !== productObject.id,
+    );
+
+    return this.usersRepository.update(userId, { cart });
+  }
+
+  async clearCart(userId: User['id']): Promise<NullableType<User>> {
+    return this.usersRepository.update(userId, { cart: [] });
+  }
 
   async create(createProfileDto: CreateUserDto): Promise<User> {
     const clonedPayload = {
@@ -37,7 +131,7 @@ export class UsersService {
 
     if (clonedPayload.email) {
       const userObject = await this.usersRepository.findOne({
-        email: clonedPayload.email,
+        where: { email: clonedPayload.email },
       });
       if (userObject) {
         throw new UnprocessableEntityException({
@@ -111,8 +205,11 @@ export class UsersService {
     });
   }
 
-  findOne(fields: EntityCondition<User>): Promise<NullableType<User>> {
-    return this.usersRepository.findOne(fields);
+  findOne(fields: EntityCondition<UserEntity>): Promise<NullableType<User>> {
+    return this.usersRepository.findOne({
+      where: fields,
+      relations: getEntityRelations(UserEntity),
+    });
   }
 
   async update(
@@ -131,7 +228,7 @@ export class UsersService {
 
     if (clonedPayload.email) {
       const userObject = await this.usersRepository.findOne({
-        email: clonedPayload.email,
+        where: { email: clonedPayload.email },
       });
 
       if (userObject && userObject.id !== id) {

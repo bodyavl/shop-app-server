@@ -416,6 +416,18 @@ export class AuthService {
     });
   }
 
+  async addToCart(userId: User['id'], productId: number): Promise<void> {
+    await this.usersService.addToCart(userId, productId);
+  }
+
+  async removeFromCart(userId: User['id'], productId: number): Promise<void> {
+    await this.usersService.removeFromCart(userId, productId);
+  }
+
+  async clearCart(userId: User['id']): Promise<void> {
+    await this.usersService.clearCart(userId);
+  }
+
   async update(
     userJwtPayload: JwtPayloadType,
     userDto: AuthUpdateDto,
