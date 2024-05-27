@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -21,6 +22,10 @@ export class CreateProductDto {
   @ApiProperty()
   @IsOptional()
   description?: string;
+
+  @ApiProperty()
+  @IsNumber()
+  price: number;
 
   @ApiProperty({ type: () => FileEntity })
   @Type(() => RelationUUIDDto)

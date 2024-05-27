@@ -2,7 +2,12 @@ import { PartialType } from '@nestjs/swagger';
 import { CreateProductDto } from './create-product.dto';
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 import { Type } from 'class-transformer';
 import { RelationUUIDDto } from 'src/core/dto/relation-uuid.dto';
@@ -19,6 +24,11 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   @ApiProperty()
   @IsOptional()
   description?: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  price?: number;
 
   @ApiProperty({ type: () => FileEntity })
   @Type(() => RelationUUIDDto)

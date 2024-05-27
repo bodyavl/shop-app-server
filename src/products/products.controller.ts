@@ -68,7 +68,7 @@ export class ProductsController {
     type: Product,
   })
   @SerializeOptions({
-    groups: ['admin'],
+    groups: ['detailed'],
   })
   @Get(':id')
   @HttpCode(HttpStatus.OK)

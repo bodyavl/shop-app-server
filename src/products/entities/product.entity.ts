@@ -12,6 +12,7 @@ import { FileEntity } from '../../files/infrastructure/persistence/relational/en
 import { EntityRelationalHelper } from '../../utils/relational-entity-helper';
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { Category } from '../../categories/entities/category.entity';
+import { Expose } from 'class-transformer';
 
 @Entity()
 export class Product extends EntityRelationalHelper {
@@ -30,8 +31,13 @@ export class Product extends EntityRelationalHelper {
   name: string;
 
   @ApiResponseProperty()
+  @Expose({ groups: ['detailed'] })
   @Column({ nullable: true })
   description?: string;
+
+  @ApiResponseProperty()
+  @Column({ type: 'double precision', default: 0 })
+  price: number;
 
   @ApiResponseProperty({
     type: () => FileEntity,
