@@ -206,9 +206,11 @@ export class UsersService {
   }
 
   findOne(fields: EntityCondition<UserEntity>): Promise<NullableType<User>> {
+    const relations = getEntityRelations(UserEntity);
+    relations.cart = { photo: true };
     return this.usersRepository.findOne({
       where: fields,
-      relations: getEntityRelations(UserEntity),
+      relations,
     });
   }
 
