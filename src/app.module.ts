@@ -21,6 +21,9 @@ import { SessionModule } from './session/session.module';
 import { MailerModule } from './mailer/mailer.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import stripeConfig from './payments-stripe/config/stripe.config';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsStripeModule } from './payments-stripe/payments-stripe.module';
 
 const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   useClass: TypeOrmConfigService,
@@ -33,7 +36,14 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],
+      load: [
+        databaseConfig,
+        authConfig,
+        appConfig,
+        mailConfig,
+        fileConfig,
+        stripeConfig,
+      ],
       envFilePath: ['.env'],
     }),
     infrastructureDatabaseModule,
@@ -69,6 +79,8 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
     HomeModule,
     ProductsModule,
     CategoriesModule,
+    OrdersModule,
+    PaymentsStripeModule,
   ],
 })
 export class AppModule {}
